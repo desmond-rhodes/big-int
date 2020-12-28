@@ -1,16 +1,16 @@
-PROGRAM := big-int
-cc := clang
+PROGRAM := program
+CC := clang++
 
 .PHONY: all
 all: $(PROGRAM)
 
 $(PROGRAM): main.o
-	$(cc) -o $@ $^
+	$(CC) -o $@ $^
 
-%.o: %.c %.h
-	$(cc) -c $<
-%.o: %.c
-	$(cc) -c $<
+%.o: %.cc %.hh
+	$(CC) -c $<
+%.o: %.cc
+	$(CC) -c $<
 
 .PHONY: clean
 clean:
