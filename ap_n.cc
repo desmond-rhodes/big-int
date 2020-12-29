@@ -93,6 +93,22 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	return prune();
 }
 
+ap_n& ap_n::operator*=(const ap_n& x) {
+	ap_n& n = *this;
+	ap_n m {x};
+	ap_n p {0};
+
+	while (n.index.size()) {
+		if (n.index[0] & 1)
+			p += m;
+		n >>= 1;
+		m <<= 1;
+	}
+
+	n = std::move(p);
+	return prune();
+}
+
 std::ostream& ap_n::out(std::ostream& os) const {
 	os << '[';
 	auto i = index.rbegin();
@@ -126,6 +142,14 @@ ap_n operator>>(const ap_n& n, unsigned int t) {
 	return tmp >>= t;
 }
 ap_n operator>>(ap_n&& n, unsigned int t) { return n >>= t; }
+
+ap_n operator*(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	return tmp *= m;
+}
+ap_n operator*(ap_n& n, const ap_n& m) { return n *= m; }
+ap_n operator*(const ap_n& n, ap_n& m) { return m *= n; }
+ap_n operator*(ap_n&& n, ap_n&& m) { return n *= m; }
 
 std::ostream& operator<<(std::ostream& os, const ap_n& n) {
 	return n.out(os);
