@@ -32,6 +32,9 @@ ap_n operator+(ap_n&&, ap_n&&);
 ap_n operator<<(const ap_n&, unsigned int);
 ap_n operator<<(ap_n&&, unsigned int);
 
+ap_n operator>>(const ap_n&, unsigned int);
+ap_n operator>>(ap_n&&, unsigned int);
+
 std::ostream& operator<<(std::ostream&, const ap_n&);
 
 #endif

@@ -52,10 +52,12 @@ ap_n& ap_n::operator<<=(unsigned int t) {
 	auto i = index.size();
 	auto j = i - t / bits;
 
-	while (j > 0)
-		index[--i] = index[--j];
-	while (i > 0)
-		index[--i] = 0;
+	if (j < i) {
+		while (j > 0)
+			index[--i] = index[--j];
+		while (i > 0)
+			index[--i] = 0;
+	}
 
 	t %= bits;
 	if (t)
@@ -75,7 +77,26 @@ ap_n& ap_n::operator<<=(unsigned int t) {
 }
 
 ap_n& ap_n::operator>>=(unsigned int t) {
-	return *this;
+	decltype(index.size()) i, j = t / bits;
+
+	if (j >= index.size()) {
+		index = {};
+	} else {
+		if (j > 0)
+			for (i = 0;	j < index.size(); ++i, ++j)
+				index[i] = index[j];
+		index.resize(index.size() - t / bits);
+
+		t %= bits;
+		base_t hi = (base << t) & base;
+		base_t lo = ~hi & base;
+
+		for (i = 0; i < index.size()-1; ++i)
+			index[i] = (index[i] & hi) >> t | (index[i+1] & lo) << (bits-t);
+		index.back() = (index.back() & hi) >> t;
+	}
+
+	return prune();
 }
 
 std::ostream& ap_n::out(std::ostream& os) const {
@@ -96,7 +117,6 @@ ap_n operator+(const ap_n& n, const ap_n& m) {
 	ap_n tmp {n};
 	return tmp += m;
 }
-
 ap_n operator+(ap_n&& n, const ap_n& m) { return n += m; }
 ap_n operator+(const ap_n& n, ap_n&& m) { return m += n; }
 ap_n operator+(ap_n&& n, ap_n&& m) { return n += m; }
@@ -105,8 +125,13 @@ ap_n operator<<(const ap_n& n, unsigned int t) {
 	ap_n tmp {n};
 	return tmp <<= t;
 }
-
 ap_n operator<<(ap_n&& n, unsigned int t) { return n <<= t; }
+
+ap_n operator>>(const ap_n& n, unsigned int t) {
+	ap_n tmp {n};
+	return tmp >>= t;
+}
+ap_n operator>>(ap_n&& n, unsigned int t) { return n >>= t; }
 
 std::ostream& operator<<(std::ostream& os, const ap_n& n) {
 	return n.out(os);
