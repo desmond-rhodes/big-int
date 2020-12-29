@@ -2,14 +2,23 @@
 #include <algorithm>
 #include <limits>
 
+/* Class Properties */
+
 static_assert(
 	std::numeric_limits<ap_n::base_t>::max() >= 0xffffffff,
 	"Base storage type is too small."
 );
 
-const ap_n::base_t ap_n::base = 0xff;
+/* Member Functions */
 
-ap_n::ap_n() :index{0} {}
+ap_n& ap_n::prune() {
+	decltype(index.size()) remove {0};
+	for (auto i = index.rbegin(); i != index.rend(); ++i)
+		if (*i) break;
+		else ++remove;
+	index.resize(index.size()-remove);
+	return *this;
+}
 
 ap_n::ap_n(std::initializer_list<base_t> i)
 	:index{i}
@@ -21,30 +30,51 @@ ap_n& ap_n::operator+=(const ap_n& x) {
 	auto& n =   index;
 	auto& m = x.index;
 
-	auto i = m.size() - n.size();
-	for (; i > 0; --i)
-		n.push_back(0);
-	auto s = n.size();
+	if (m.size() > n.size())
+		n.resize(m.size(), 0);
 
-	bool carry {false};
-	base_t sum;
-
-	for (i = 0; i < s; ++i) {
-		sum = n[i] + m[i];
-		if (sum > base) {
-			sum -= 1;
-			sum -= base;
-		}
-		bool carry_old {carry};
-		carry = sum < n[i] || sum < m[i];
-
-		if (carry_old)
-			sum += 1;
-		n[i] = sum;
+	base_t carry {0};
+	for (decltype(n.size()) i = 0; i < n.size(); ++i) {
+		base_t s = (n[i] + m[i]) & base;
+		base_t c = s < n[i] || s < m[i];
+		n[i] = s + carry;
+		carry = c;
 	}
 	if (carry)
 		n.push_back(1);
 
+	return prune();
+}
+
+ap_n& ap_n::operator<<=(unsigned int t) {
+	index.resize(index.size() + t / bits);
+
+	auto i = index.size();
+	auto j = i - t / bits;
+
+	while (j > 0)
+		index[--i] = index[--j];
+	while (i > 0)
+		index[--i] = 0;
+
+	t %= bits;
+	if (t)
+		index.push_back(0);
+
+	base_t lo = (base >> t) & base;
+	base_t hi = ~lo & base;
+
+	i = index.size();
+	while (i > 1) {
+		--i;
+		index[i] = (index[i] & lo) << t | (index[i-1] & hi) >> (bits-t);
+	}
+	index[0] = (index[0] & lo) << t;
+
+	return prune();
+}
+
+ap_n& ap_n::operator>>=(unsigned int t) {
 	return *this;
 }
 
@@ -59,6 +89,24 @@ std::ostream& ap_n::out(std::ostream& os) const {
 	}
 	return os << ']';
 }
+
+/* Helper Functions */
+
+ap_n operator+(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	return tmp += m;
+}
+
+ap_n operator+(ap_n&& n, const ap_n& m) { return n += m; }
+ap_n operator+(const ap_n& n, ap_n&& m) { return m += n; }
+ap_n operator+(ap_n&& n, ap_n&& m) { return n += m; }
+
+ap_n operator<<(const ap_n& n, unsigned int t) {
+	ap_n tmp {n};
+	return tmp <<= t;
+}
+
+ap_n operator<<(ap_n&& n, unsigned int t) { return n <<= t; }
 
 std::ostream& operator<<(std::ostream& os, const ap_n& n) {
 	return n.out(os);
