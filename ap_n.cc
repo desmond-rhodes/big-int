@@ -12,11 +12,8 @@ static_assert(
 /* Member Functions */
 
 ap_n& ap_n::prune() {
-	decltype(index.size()) remove {0};
-	for (auto i = index.rbegin(); i != index.rend(); ++i)
-		if (*i) break;
-		else ++remove;
-	index.resize(index.size()-remove);
+	while (!index.back())
+		index.pop_back();
 	return *this;
 }
 
@@ -47,51 +44,48 @@ ap_n& ap_n::operator+=(const ap_n& x) {
 }
 
 ap_n& ap_n::operator<<=(unsigned int t) {
-	index.resize(index.size() + t / bits);
-
-	auto i = index.size();
-	auto j = i - t / bits;
-
-	if (j < i) {
-		while (j > 0)
-			index[--i] = index[--j];
-		while (i > 0)
-			index[--i] = 0;
-	}
-
+	auto s = t / bits;
 	t %= bits;
-	if (t)
+
+	if (t) {
+		base_t lo = (base >> t) & base;
+		base_t hi = ~lo & base;
 		index.push_back(0);
-
-	base_t lo = (base >> t) & base;
-	base_t hi = ~lo & base;
-
-	i = index.size();
-	while (i > 1) {
-		--i;
-		index[i] = (index[i] & lo) << t | (index[i-1] & hi) >> (bits-t);
+		for (auto i = index.size()-1; i > 0; --i)
+			index[i] = (index[i] & lo) << t | (index[i-1] & hi) >> (bits-t);
+		index[0] = (index[0] & lo) << t;
 	}
-	index[0] = (index[0] & lo) << t;
+
+	if (s) {
+		auto j = index.size();
+		index.resize(index.size() + s);
+		auto i = index.size();
+		while (j > 0) index[--i] = index[--j];
+		while (i > 0) index[--i] = 0;
+	}
 
 	return prune();
 }
 
 ap_n& ap_n::operator>>=(unsigned int t) {
-	decltype(index.size()) i, j = t / bits;
+	auto s = t / bits;
+	t %= bits;
 
-	if (j >= index.size()) {
+	if (s >= index.size()) {
 		index = {};
-	} else {
-		if (j > 0)
-			for (i = 0;	j < index.size(); ++i, ++j)
-				index[i] = index[j];
-		index.resize(index.size() - t / bits);
+		return *this;
+	}
 
-		t %= bits;
+	if (s) {
+		for (decltype(index.size()) i = s; i < index.size(); ++i)
+			index[i-s] = index[i];
+		index.resize(index.size() - s);
+	}
+
+	if (t) {
 		base_t hi = (base << t) & base;
 		base_t lo = ~hi & base;
-
-		for (i = 0; i < index.size()-1; ++i)
+		for (decltype(index.size()) i = 0; i < index.size()-1; ++i)
 			index[i] = (index[i] & hi) >> t | (index[i+1] & lo) << (bits-t);
 		index.back() = (index.back() & hi) >> t;
 	}
