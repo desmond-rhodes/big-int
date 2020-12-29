@@ -12,7 +12,7 @@ static_assert(
 /* Member Functions */
 
 ap_n& ap_n::prune() {
-	while (!index.back())
+	while (index.size() && !index.back())
 		index.pop_back();
 	return *this;
 }
