@@ -7,7 +7,7 @@ static_assert(
 	"Base storage type is too small."
 );
 
-const ap_n::base_t ap_n::base = 9;
+const ap_n::base_t ap_n::base = 0xff;
 
 ap_n::ap_n() :index{0} {}
 
