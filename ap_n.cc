@@ -164,35 +164,55 @@ std::ostream& ap_n::out(std::ostream& os) const {
 	return os << ']';
 }
 
-/* Helper Functions */
+/* Overload Operators */
 
 ap_n operator+(const ap_n& n, const ap_n& m) {
 	ap_n tmp {n};
-	return tmp += m;
+	tmp += m;
+	return tmp;
 }
-ap_n operator+(ap_n&& n, const ap_n& m) { return n += m; }
-ap_n operator+(const ap_n& n, ap_n&& m) { return m += n; }
-ap_n operator+(ap_n&& n, ap_n&& m) { return n += m; }
+ap_n operator+(ap_n&& n, const ap_n& m) {
+	n += m;
+	return std::move(n);
+}
+ap_n operator+(const ap_n& n, ap_n&& m) {
+	m += n;
+	return std::move(m);
+}
 
 ap_n operator<<(const ap_n& n, unsigned int t) {
 	ap_n tmp {n};
-	return tmp <<= t;
+	tmp <<= t;
+	return tmp;
 }
-ap_n operator<<(ap_n&& n, unsigned int t) { return n <<= t; }
+ap_n operator<<(ap_n&& n, unsigned int t) {
+	n <<= t;
+	return std::move(n);
+}
 
 ap_n operator>>(const ap_n& n, unsigned int t) {
 	ap_n tmp {n};
-	return tmp >>= t;
+	tmp >>= t;
+	return tmp;
 }
-ap_n operator>>(ap_n&& n, unsigned int t) { return n >>= t; }
+ap_n operator>>(ap_n&& n, unsigned int t) {
+	n >>= t;
+	return std::move(n);
+}
 
 ap_n operator*(const ap_n& n, const ap_n& m) {
 	ap_n tmp {n};
-	return tmp *= m;
+	tmp *= m;
+	return tmp;
 }
-ap_n operator*(ap_n& n, const ap_n& m) { return n *= m; }
-ap_n operator*(const ap_n& n, ap_n& m) { return m *= n; }
-ap_n operator*(ap_n&& n, ap_n&& m) { return n *= m; }
+ap_n operator*(ap_n& n, const ap_n& m) {
+	n *= m;
+	return std::move(n);
+}
+ap_n operator*(const ap_n& n, ap_n& m) {
+	m *= n;
+	return std::move(m);
+}
 
 bool operator!=(const ap_n& n, const ap_n& m) { return !(n == m); }
 bool operator<(const ap_n& n, const ap_n& m) { return !(n >= m); }

@@ -35,7 +35,6 @@ class ap_n {
 ap_n operator+(const ap_n&, const ap_n&);
 ap_n operator+(ap_n&&, const ap_n&);
 ap_n operator+(const ap_n&, ap_n&&);
-ap_n operator+(ap_n&&, ap_n&&);
 
 ap_n operator<<(const ap_n&, unsigned int);
 ap_n operator<<(ap_n&&, unsigned int);
@@ -46,7 +45,6 @@ ap_n operator>>(ap_n&&, unsigned int);
 ap_n operator*(const ap_n&, const ap_n&);
 ap_n operator*(ap_n&&, const ap_n&);
 ap_n operator*(const ap_n&, ap_n&&);
-ap_n operator*(ap_n&&, ap_n&&);
 
 bool operator!=(const ap_n&, const ap_n&);
 bool operator<(const ap_n&, const ap_n&);
