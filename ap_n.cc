@@ -9,13 +9,22 @@ static_assert(
 	"Base storage type is too small."
 );
 
-/* Member Functions */
+/* Private Member Functions */
+
+ap_n::size_type ap_n::size() const {
+	auto s = this->index.size();
+	for (; s > 0; --s)
+		if (this->index[s-1])
+			break;
+	return s;
+}
 
 ap_n& ap_n::prune() {
-	while (index.size() && !index.back())
-		index.pop_back();
+	this->index.resize(this->size());
 	return *this;
 }
+
+/* Public Member Functions */
 
 ap_n::ap_n(std::initializer_list<base_t> i)
 	:index{i}
@@ -31,7 +40,7 @@ ap_n& ap_n::operator+=(const ap_n& x) {
 		n.resize(m.size(), 0);
 
 	base_t carry {0};
-	for (decltype(n.size()) i = 0; i < n.size(); ++i) {
+	for (size_type i = 0; i < n.size(); ++i) {
 		base_t s = (n[i] + m[i]) & base;
 		base_t c = s < n[i] || s < m[i];
 		n[i] = s + carry;
@@ -40,7 +49,7 @@ ap_n& ap_n::operator+=(const ap_n& x) {
 	if (carry)
 		n.push_back(1);
 
-	return prune();
+	return *this;
 }
 
 ap_n& ap_n::operator<<=(unsigned int t) {
@@ -72,12 +81,12 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	t %= bits;
 
 	if (s >= index.size()) {
-		index = {};
+		index.clear();
 		return *this;
 	}
 
 	if (s) {
-		for (decltype(index.size()) i = s; i < index.size(); ++i)
+		for (size_type i = s; i < index.size(); ++i)
 			index[i-s] = index[i];
 		index.resize(index.size() - s);
 	}
@@ -85,7 +94,7 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	if (t) {
 		base_t hi = (base << t) & base;
 		base_t lo = ~hi & base;
-		for (decltype(index.size()) i = 0; i < index.size()-1; ++i)
+		for (size_type i = 0; i < index.size()-1; ++i)
 			index[i] = (index[i] & hi) >> t | (index[i+1] & lo) << (bits-t);
 		index.back() = (index.back() & hi) >> t;
 	}
@@ -94,7 +103,7 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 }
 
 ap_n& ap_n::operator*=(const ap_n& x) {
-	ap_n& n = *this;
+	auto& n = *this;
 	ap_n m {x};
 	ap_n p {0};
 
@@ -106,7 +115,41 @@ ap_n& ap_n::operator*=(const ap_n& x) {
 	}
 
 	n = std::move(p);
-	return prune();
+	return *this;
+}
+
+bool ap_n::operator==(const ap_n& x) const {
+	auto ns = this->size();
+	auto ms =     x.size();
+	if (ns != ms) return false;
+	while (ns) if (index[--ns] != x.index[--ms]) return false;
+	return true;
+}
+
+bool ap_n::operator<=(const ap_n& x) const {
+	auto ns = this->size();
+	auto ms =     x.size();
+	if (ns > ms) return false;
+	if (ns < ms) return true;
+	while (ns) {
+		--ns, --ms;
+		if (index[ns] > x.index[ms]) return false;
+		if (index[ns] < x.index[ms]) return true;
+	}
+	return true;
+}
+
+bool ap_n::operator>=(const ap_n& x) const {
+	auto ns = this->size();
+	auto ms =     x.size();
+	if (ns < ms) return false;
+	if (ns > ms) return true;
+	while (ns) {
+		--ns, --ms;
+		if (index[ns] < x.index[ms]) return false;
+		if (index[ns] > x.index[ms]) return true;
+	}
+	return true;
 }
 
 std::ostream& ap_n::out(std::ostream& os) const {
@@ -151,6 +194,8 @@ ap_n operator*(ap_n& n, const ap_n& m) { return n *= m; }
 ap_n operator*(const ap_n& n, ap_n& m) { return m *= n; }
 ap_n operator*(ap_n&& n, ap_n&& m) { return n *= m; }
 
-std::ostream& operator<<(std::ostream& os, const ap_n& n) {
-	return n.out(os);
-}
+bool operator!=(const ap_n& n, const ap_n& m) { return !(n == m); }
+bool operator<(const ap_n& n, const ap_n& m) { return !(n >= m); }
+bool operator>(const ap_n& n, const ap_n& m) { return !(n <= m); }
+
+std::ostream& operator<<(std::ostream& os, const ap_n& n) { return n.out(os); }
