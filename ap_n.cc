@@ -12,15 +12,15 @@ static_assert(
 /* Private Member Functions */
 
 ap_n::size_type ap_n::size() const {
-	auto s = this->index.size();
+	auto s = index.size();
 	for (; s > 0; --s)
-		if (this->index[s-1])
+		if (index[s-1])
 			break;
 	return s;
 }
 
 ap_n& ap_n::prune() {
-	this->index.resize(this->size());
+	index.resize(size());
 	return *this;
 }
 
@@ -35,21 +35,23 @@ ap_n::ap_n(std::initializer_list<base_t> i)
 ap_n& ap_n::operator+=(const ap_n& x) {
 	auto& n =   index;
 	auto& m = x.index;
-
-	if (m.size() > n.size())
-		n.resize(m.size(), 0);
+	auto ms = x.size();
+	if (size() < ms) n.resize(ms+1, 0);
+	else n.push_back(0);
 
 	base_t carry {0};
-	for (size_type i = 0; i < n.size(); ++i) {
-		base_t s = (n[i] + m[i]) & base;
-		base_t c = s < n[i] || s < m[i];
-		n[i] = s + carry;
-		carry = c;
-	}
-	if (carry)
-		n.push_back(1);
+	size_type i {0};
 
-	return *this;
+	for (; i < ms; ++i) {
+		n[i] = (n[i] + m[i] + carry) & base;
+		carry = (carry) ? n[i] <= m[i] : n[i] < m[i];
+	}
+	for (; carry; ++i) {
+		n[i] = (n[i] + carry) & base;
+		carry = !n[i];
+	}
+
+	return prune();
 }
 
 ap_n& ap_n::operator<<=(unsigned int t) {
@@ -103,32 +105,29 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 }
 
 ap_n& ap_n::operator*=(const ap_n& x) {
-	auto& n = *this;
 	ap_n m {x};
-	ap_n p {0};
-
-	while (n.index.size()) {
-		if (n.index[0] & 1)
+	ap_n p {};
+	while (index.size()) {
+		if (index[0] & 1)
 			p += m;
-		n >>= 1;
+		*this >>= 1;
 		m <<= 1;
 	}
-
-	n = std::move(p);
+	*this = std::move(p);
 	return *this;
 }
 
 bool ap_n::operator==(const ap_n& x) const {
-	auto ns = this->size();
-	auto ms =     x.size();
+	auto ns =   size();
+	auto ms = x.size();
 	if (ns != ms) return false;
 	while (ns) if (index[--ns] != x.index[--ms]) return false;
 	return true;
 }
 
 bool ap_n::operator<=(const ap_n& x) const {
-	auto ns = this->size();
-	auto ms =     x.size();
+	auto ns =   size();
+	auto ms = x.size();
 	if (ns > ms) return false;
 	if (ns < ms) return true;
 	while (ns) {
@@ -140,8 +139,8 @@ bool ap_n::operator<=(const ap_n& x) const {
 }
 
 bool ap_n::operator>=(const ap_n& x) const {
-	auto ns = this->size();
-	auto ms =     x.size();
+	auto ns =   size();
+	auto ms = x.size();
 	if (ns < ms) return false;
 	if (ns > ms) return true;
 	while (ns) {

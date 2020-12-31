@@ -10,6 +10,9 @@ class ap_n {
 		static const base_t base {0xf};
 		static const base_t bits {4};
 
+		using size_type = std::vector<base_t>::size_type;
+		size_type size() const;
+
 		ap_n() = default;
 		ap_n(std::initializer_list<base_t>);
 
@@ -26,9 +29,6 @@ class ap_n {
 
 	private:
 		std::vector<base_t> index;
-		using size_type = std::vector<base_t>::size_type;
-
-		size_type size() const;
 		ap_n& prune();
 };
 
