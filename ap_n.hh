@@ -22,6 +22,12 @@ class ap_n {
 		ap_n& operator+=(const ap_n&);
 		ap_n& operator-=(const ap_n&);
 		ap_n& operator*=(ap_n&&);
+		ap_n& operator/=(const ap_n&);
+		ap_n& operator%=(const ap_n&);
+
+		void division(const ap_n&);
+		ap_n quotient() const;
+		ap_n reminder() const;
 
 		bool operator==(const ap_n&) const;
 		bool operator<=(const ap_n&) const;
@@ -31,7 +37,10 @@ class ap_n {
 
 	private:
 		std::vector<base_t> index;
+		std::vector<base_t> quotient_;
+		std::vector<base_t> reminder_;
 		ap_n& prune();
+		ap_n(const std::vector<base_t>&, const std::vector<base_t>&, const std::vector<base_t>&);
 };
 
 ap_n operator<<(const ap_n&, unsigned int);
@@ -51,6 +60,12 @@ ap_n& operator*=(ap_n&, const ap_n&);
 ap_n operator*(const ap_n&, const ap_n&);
 ap_n operator*(ap_n&&, const ap_n&);
 ap_n operator*(const ap_n&, ap_n&&);
+
+ap_n operator/(const ap_n&, const ap_n&);
+ap_n operator/(ap_n&&, const ap_n&);
+
+ap_n operator%(const ap_n&, const ap_n&);
+ap_n operator%(ap_n&&, const ap_n&);
 
 bool operator!=(const ap_n&, const ap_n&);
 bool operator<(const ap_n&, const ap_n&);

@@ -24,6 +24,9 @@ ap_n& ap_n::prune() {
 
 /* Member */
 
+ap_n::ap_n(const std::vector<base_t>& i, const std::vector<base_t>& q, const std::vector<base_t>& r)
+	: index{i}, quotient_ {q}, reminder_ {r} {}
+
 ap_n::ap_n(std::initializer_list<base_t> i)
 	:index{i}
 {
@@ -140,6 +143,31 @@ ap_n& ap_n::operator*=(ap_n&& m) {
 	return *this;
 }
 
+ap_n& ap_n::operator/=(const ap_n& m) {
+	division(m);
+	index = quotient_;
+	return *this;
+}
+
+ap_n& ap_n::operator%=(const ap_n& m) {
+	division(m);
+	index = reminder_;
+	return *this;
+}
+
+void ap_n::division(const ap_n& x) {
+}
+
+ap_n ap_n::quotient() const {
+	ap_n tmp {quotient_, quotient_, reminder_};
+	return tmp;
+}
+
+ap_n ap_n::reminder() const {
+	ap_n tmp {reminder_, quotient_, reminder_};
+	return tmp;
+}
+
 bool ap_n::operator==(const ap_n& x) const {
 	auto ns =   size();
 	auto ms = x.size();
@@ -248,6 +276,26 @@ ap_n operator*(ap_n&& n, const ap_n& m) {
 }
 ap_n operator*(const ap_n& n, ap_n&& m) {
 	m *= n;
+	return std::move(m);
+}
+
+ap_n operator/(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	tmp /= m;
+	return tmp;
+}
+ap_n operator/(ap_n&& n, const ap_n& m) {
+	n /= m;
+	return std::move(n);
+}
+
+ap_n operator%(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	tmp %= m;
+	return tmp;
+}
+ap_n operator%(ap_n&& n, const ap_n& m) {
+	n %= m;
 	return std::move(m);
 }
 
