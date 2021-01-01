@@ -16,11 +16,12 @@ class ap_n {
 		ap_n() = default;
 		ap_n(std::initializer_list<base_t>);
 
-		ap_n& operator+=(const ap_n&);
 		ap_n& operator<<=(unsigned int);
 		ap_n& operator>>=(unsigned int);
-		ap_n& operator*=(const ap_n&);
+
+		ap_n& operator+=(const ap_n&);
 		ap_n& operator-=(const ap_n&);
+		ap_n& operator*=(const ap_n&);
 
 		bool operator==(const ap_n&) const;
 		bool operator<=(const ap_n&) const;
@@ -33,22 +34,22 @@ class ap_n {
 		ap_n& prune();
 };
 
-ap_n operator+(const ap_n&, const ap_n&);
-ap_n operator+(ap_n&&, const ap_n&);
-ap_n operator+(const ap_n&, ap_n&&);
-
 ap_n operator<<(const ap_n&, unsigned int);
 ap_n operator<<(ap_n&&, unsigned int);
 
 ap_n operator>>(const ap_n&, unsigned int);
 ap_n operator>>(ap_n&&, unsigned int);
 
-ap_n operator*(const ap_n&, const ap_n&);
-ap_n operator*(ap_n&&, const ap_n&);
-ap_n operator*(const ap_n&, ap_n&&);
+ap_n operator+(const ap_n&, const ap_n&);
+ap_n operator+(ap_n&&, const ap_n&);
+ap_n operator+(const ap_n&, ap_n&&);
 
 ap_n operator-(const ap_n&, const ap_n&);
 ap_n operator-(ap_n&&, const ap_n&);
+
+ap_n operator*(const ap_n&, const ap_n&);
+ap_n operator*(ap_n&&, const ap_n&);
+ap_n operator*(const ap_n&, ap_n&&);
 
 bool operator!=(const ap_n&, const ap_n&);
 bool operator<(const ap_n&, const ap_n&);

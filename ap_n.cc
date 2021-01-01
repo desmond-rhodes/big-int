@@ -2,14 +2,12 @@
 #include <algorithm>
 #include <limits>
 
-/* Class Properties */
+/* Properties */
 
 static_assert(
 	std::numeric_limits<ap_n::base_t>::max() >= 0xffffffff,
 	"Base storage type is too small."
 );
-
-/* Private Member Functions */
 
 ap_n::size_type ap_n::size() const {
 	auto s = index.size();
@@ -24,35 +22,12 @@ ap_n& ap_n::prune() {
 	return *this;
 }
 
-/* Public Member Functions */
+/* Member */
 
 ap_n::ap_n(std::initializer_list<base_t> i)
 	:index{i}
 {
 	std::reverse(index.begin(), index.end());
-}
-
-ap_n& ap_n::operator+=(const ap_n& x) {
-	auto& n =   index;
-	auto& m = x.index;
-	auto ns =   size();
-	auto ms = x.size();
-	if (ns < ms) n.resize(ms+1, 0);
-	else if (index.size() == ns) n.push_back(0);
-
-	base_t carry {0};
-	size_type i {0};
-
-	for (; i < ms; ++i) {
-		n[i] = (n[i] + m[i] + carry) & base;
-		carry = (carry) ? n[i] <= m[i] : n[i] < m[i];
-	}
-	for (; carry; ++i) {
-		n[i] = (n[i] + 1) & base;
-		carry = !n[i];
-	}
-
-	return prune();
 }
 
 ap_n& ap_n::operator<<=(unsigned int t) {
@@ -105,17 +80,27 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	return prune();
 }
 
-ap_n& ap_n::operator*=(const ap_n& x) {
-	ap_n m {x};
-	ap_n p {};
-	while (index.size()) {
-		if (index[0] & 1)
-			p += m;
-		*this >>= 1;
-		m <<= 1;
+ap_n& ap_n::operator+=(const ap_n& x) {
+	auto& n =   index;
+	auto& m = x.index;
+	auto ns =   size();
+	auto ms = x.size();
+	if (ns < ms) n.resize(ms+1, 0);
+	else if (index.size() == ns) n.push_back(0);
+
+	base_t carry {0};
+	size_type i {0};
+
+	for (; i < ms; ++i) {
+		n[i] = (n[i] + m[i] + carry) & base;
+		carry = (carry) ? n[i] <= m[i] : n[i] < m[i];
 	}
-	*this = std::move(p);
-	return *this;
+	for (; carry; ++i) {
+		n[i] = (n[i] + 1) & base;
+		carry = !n[i];
+	}
+
+	return prune();
 }
 
 ap_n& ap_n::operator-=(const ap_n& x) {
@@ -141,6 +126,19 @@ ap_n& ap_n::operator-=(const ap_n& x) {
 	}
 
 	return prune();
+}
+
+ap_n& ap_n::operator*=(const ap_n& x) {
+	ap_n m {x};
+	ap_n p {};
+	while (index.size()) {
+		if (index[0] & 1)
+			p += m;
+		*this >>= 1;
+		m <<= 1;
+	}
+	*this = std::move(p);
+	return *this;
 }
 
 bool ap_n::operator==(const ap_n& x) const {
@@ -189,21 +187,7 @@ std::ostream& ap_n::out(std::ostream& os) const {
 	return os << ']';
 }
 
-/* Overload Operators */
-
-ap_n operator+(const ap_n& n, const ap_n& m) {
-	ap_n tmp {n};
-	tmp += m;
-	return tmp;
-}
-ap_n operator+(ap_n&& n, const ap_n& m) {
-	n += m;
-	return std::move(n);
-}
-ap_n operator+(const ap_n& n, ap_n&& m) {
-	m += n;
-	return std::move(m);
-}
+/* Non-member */
 
 ap_n operator<<(const ap_n& n, unsigned int t) {
 	ap_n tmp {n};
@@ -225,6 +209,30 @@ ap_n operator>>(ap_n&& n, unsigned int t) {
 	return std::move(n);
 }
 
+ap_n operator+(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	tmp += m;
+	return tmp;
+}
+ap_n operator+(ap_n&& n, const ap_n& m) {
+	n += m;
+	return std::move(n);
+}
+ap_n operator+(const ap_n& n, ap_n&& m) {
+	m += n;
+	return std::move(m);
+}
+
+ap_n operator-(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	tmp -= m;
+	return tmp;
+}
+ap_n operator-(ap_n&& n, const ap_n& m) {
+	n -= m;
+	return n;
+}
+
 ap_n operator*(const ap_n& n, const ap_n& m) {
 	ap_n tmp {n};
 	tmp *= m;
@@ -237,16 +245,6 @@ ap_n operator*(ap_n& n, const ap_n& m) {
 ap_n operator*(const ap_n& n, ap_n& m) {
 	m *= n;
 	return std::move(m);
-}
-
-ap_n operator-(const ap_n& n, const ap_n& m) {
-	ap_n tmp {n};
-	tmp -= m;
-	return tmp;
-}
-ap_n operator-(ap_n&& n, const ap_n& m) {
-	n -= m;
-	return n;
 }
 
 bool operator!=(const ap_n& n, const ap_n& m) { return !(n == m); }
