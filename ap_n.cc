@@ -128,8 +128,7 @@ ap_n& ap_n::operator-=(const ap_n& x) {
 	return prune();
 }
 
-ap_n& ap_n::operator*=(const ap_n& x) {
-	ap_n m {x};
+ap_n& ap_n::operator*=(ap_n&& m) {
 	ap_n p {};
 	while (index.size()) {
 		if (index[0] & 1)
@@ -233,16 +232,21 @@ ap_n operator-(ap_n&& n, const ap_n& m) {
 	return n;
 }
 
+ap_n& operator*=(ap_n& n, const ap_n& m) {
+	ap_n tmp {m};
+	n *= std::move(tmp);
+	return n;
+}
 ap_n operator*(const ap_n& n, const ap_n& m) {
 	ap_n tmp {n};
 	tmp *= m;
 	return tmp;
 }
-ap_n operator*(ap_n& n, const ap_n& m) {
+ap_n operator*(ap_n&& n, const ap_n& m) {
 	n *= m;
 	return std::move(n);
 }
-ap_n operator*(const ap_n& n, ap_n& m) {
+ap_n operator*(const ap_n& n, ap_n&& m) {
 	m *= n;
 	return std::move(m);
 }
