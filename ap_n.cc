@@ -24,9 +24,6 @@ ap_n& ap_n::prune() {
 
 /* Member */
 
-ap_n::ap_n(const std::vector<base_t>& i, const std::vector<base_t>& q, const std::vector<base_t>& r)
-	: index{i}, quotient_ {q}, reminder_ {r} {}
-
 ap_n::ap_n(std::initializer_list<base_t> i)
 	:index{i}
 {
@@ -145,27 +142,27 @@ ap_n& ap_n::operator*=(ap_n&& m) {
 
 ap_n& ap_n::operator/=(const ap_n& m) {
 	division(m);
-	index = quotient_;
-	return *this;
+	return catch_quotient(*this);
 }
 
 ap_n& ap_n::operator%=(const ap_n& m) {
 	division(m);
-	index = reminder_;
-	return *this;
+	return catch_reminder(*this);
 }
 
 void ap_n::division(const ap_n& x) {
 }
 
-ap_n ap_n::quotient() const {
-	ap_n tmp {quotient_, quotient_, reminder_};
-	return tmp;
+ap_n& ap_n::catch_quotient(ap_n& x) {
+	index = std::move(x.quotient);
+	x.quotient.clear();
+	return *this;
 }
 
-ap_n ap_n::reminder() const {
-	ap_n tmp {reminder_, quotient_, reminder_};
-	return tmp;
+ap_n& ap_n::catch_reminder(ap_n& x) {
+	index = std::move(x.reminder);
+	x.reminder.clear();
+	return *this;
 }
 
 bool ap_n::operator==(const ap_n& x) const {
