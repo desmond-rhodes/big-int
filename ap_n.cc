@@ -35,9 +35,10 @@ ap_n::ap_n(std::initializer_list<base_t> i)
 ap_n& ap_n::operator+=(const ap_n& x) {
 	auto& n =   index;
 	auto& m = x.index;
+	auto ns =   size();
 	auto ms = x.size();
-	if (size() < ms) n.resize(ms+1, 0);
-	else n.push_back(0);
+	if (ns < ms) n.resize(ms+1, 0);
+	else if (index.size() == ns) n.push_back(0);
 
 	base_t carry {0};
 	size_type i {0};
@@ -47,7 +48,7 @@ ap_n& ap_n::operator+=(const ap_n& x) {
 		carry = (carry) ? n[i] <= m[i] : n[i] < m[i];
 	}
 	for (; carry; ++i) {
-		n[i] = (n[i] + carry) & base;
+		n[i] = (n[i] + 1) & base;
 		carry = !n[i];
 	}
 
@@ -115,6 +116,31 @@ ap_n& ap_n::operator*=(const ap_n& x) {
 	}
 	*this = std::move(p);
 	return *this;
+}
+
+ap_n& ap_n::operator-=(const ap_n& x) {
+	auto& n =   index;
+	if (*this <= x) {
+		n.clear();
+		return *this;
+	}
+	auto& m = x.index;
+	auto ms = x.size();
+
+	base_t borrow {0};
+	size_type i {0};
+
+	for (; i < ms; ++i) {
+		base_t s = (n[i] - m[i] - borrow) & base;
+		borrow = (borrow) ? s >= n[i] : s > n[i];
+		n[i] = s;
+	}
+	for (; borrow; ++i) {
+		borrow = !n[i];
+		n[i] = (n[i] - 1) & base;
+	}
+
+	return prune();
 }
 
 bool ap_n::operator==(const ap_n& x) const {
@@ -211,6 +237,16 @@ ap_n operator*(ap_n& n, const ap_n& m) {
 ap_n operator*(const ap_n& n, ap_n& m) {
 	m *= n;
 	return std::move(m);
+}
+
+ap_n operator-(const ap_n& n, const ap_n& m) {
+	ap_n tmp {n};
+	tmp -= m;
+	return tmp;
+}
+ap_n operator-(ap_n&& n, const ap_n& m) {
+	n -= m;
+	return n;
 }
 
 bool operator!=(const ap_n& n, const ap_n& m) { return !(n == m); }
