@@ -9,6 +9,8 @@ static_assert(
 	"Base storage type is too small."
 );
 
+const ap_n one {1};
+
 ap_n::size_type ap_n::size() const {
 	auto s = index.size();
 	for (; s > 0; --s)
@@ -150,9 +152,6 @@ ap_n& ap_n::operator%=(const ap_n& m) {
 	return catch_reminder(*this);
 }
 
-void ap_n::division(const ap_n& x) {
-}
-
 ap_n& ap_n::catch_quotient(ap_n& x) {
 	index = std::move(x.quotient);
 	x.quotient.clear();
@@ -163,6 +162,24 @@ ap_n& ap_n::catch_reminder(ap_n& x) {
 	index = std::move(x.reminder);
 	x.reminder.clear();
 	return *this;
+}
+
+void ap_n::division(const ap_n& d) {
+	auto i = size();
+	ap_n q {};
+	ap_n r {};
+	while (i--) for (auto b = 1 << bits-1; b; b >>= 1) {
+		q <<= 1;
+		r <<= 1;
+		if (index[i] & b)
+			r += one;
+		if (r >= d) {
+			r -= d;
+			q += one;
+		}
+	}
+	quotient = std::move(q.index);
+	reminder = std::move(r.index);
 }
 
 bool ap_n::operator==(const ap_n& x) const {

@@ -25,7 +25,6 @@ class ap_n {
 		ap_n& operator/=(const ap_n&);
 		ap_n& operator%=(const ap_n&);
 
-		void division(const ap_n&);
 		ap_n& catch_quotient(ap_n&);
 		ap_n& catch_reminder(ap_n&);
 
@@ -41,6 +40,7 @@ class ap_n {
 		std::vector<base_t> reminder;
 
 		ap_n& prune();
+		void division(const ap_n&);
 };
 
 ap_n operator<<(const ap_n&, unsigned int);
