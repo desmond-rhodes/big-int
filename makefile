@@ -1,6 +1,12 @@
-PROGRAM := program
-CC := clang++
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CC := g++
+endif
+ifeq ($(UNAME_S),Darwin)
+	CC := clang++
+endif
 FLAGS := -std=c++17
+PROGRAM := program
 
 .PHONY: all
 all: $(PROGRAM)
