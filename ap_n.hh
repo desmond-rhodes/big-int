@@ -7,11 +7,7 @@
 class ap_n {
 	public:
 		using base_t = unsigned long long;
-		static const base_t base {0xffffffffffffffff};
-		static const base_t bits {64};
-
-		using size_type = std::vector<base_t>::size_type;
-		size_type size() const;
+		static base_t const base {0xffffffffffffffff};
 
 		ap_n() = default;
 		ap_n(std::initializer_list<base_t>);
@@ -34,12 +30,17 @@ class ap_n {
 
 		std::ostream& out(std::ostream&) const;
 
+		explicit operator bool();
+
 	private:
+		static base_t const bits {64};
+
 		std::vector<base_t> index;
 		std::vector<base_t> quotient;
 		std::vector<base_t> reminder;
 
-		ap_n& prune();
+		size_t size() const;
+		void prune();
 		void division(ap_n const&);
 };
 

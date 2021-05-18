@@ -5,13 +5,11 @@
 /* Properties */
 
 static_assert(
-	std::numeric_limits<ap_n::base_t>::max() >= 0xffffffff,
+	std::numeric_limits<ap_n::base_t>::max() >= ap_n::base,
 	"Base storage type is too small."
 );
 
-const ap_n one {1};
-
-ap_n::size_type ap_n::size() const {
+size_t ap_n::size() const {
 	auto s {index.size()};
 	for (; s > 0; --s)
 		if (index[s-1])
@@ -19,10 +17,7 @@ ap_n::size_type ap_n::size() const {
 	return s;
 }
 
-ap_n& ap_n::prune() {
-	index.resize(size());
-	return *this;
-}
+void ap_n::prune() { index.resize(size()); }
 
 /* Member */
 
@@ -53,7 +48,8 @@ ap_n& ap_n::operator<<=(unsigned int t) {
 		while (i > 0) index[--i] = 0;
 	}
 
-	return prune();
+	prune();
+	return *this;
 }
 
 ap_n& ap_n::operator>>=(unsigned int t) {
@@ -66,7 +62,7 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	}
 
 	if (s) {
-		for (size_type i {s}; i < index.size(); ++i)
+		for (size_t i {s}; i < index.size(); ++i)
 			index[i-s] = index[i];
 		index.resize(index.size() - s);
 	}
@@ -74,12 +70,13 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	if (t) {
 		base_t hi {(base << t) & base};
 		base_t lo {~hi & base};
-		for (size_type i {0}; i < index.size()-1; ++i)
+		for (size_t i {0}; i < index.size()-1; ++i)
 			index[i] = (index[i] & hi) >> t | (index[i+1] & lo) << (bits-t);
 		index.back() = (index.back() & hi) >> t;
 	}
 
-	return prune();
+	prune();
+	return *this;
 }
 
 ap_n& ap_n::operator+=(ap_n const& x) {
@@ -91,7 +88,7 @@ ap_n& ap_n::operator+=(ap_n const& x) {
 	else if (index.size() == ns) n.push_back(0);
 
 	base_t carry {0};
-	size_type i {0};
+	size_t i {0};
 
 	for (; i < ms; ++i) {
 		n[i] = (n[i] + m[i] + carry) & base;
@@ -102,7 +99,8 @@ ap_n& ap_n::operator+=(ap_n const& x) {
 		carry = !n[i];
 	}
 
-	return prune();
+	prune();
+	return *this;
 }
 
 ap_n& ap_n::operator-=(ap_n const& x) {
@@ -115,7 +113,7 @@ ap_n& ap_n::operator-=(ap_n const& x) {
 	auto ms {x.size()};
 
 	base_t borrow {0};
-	size_type i {0};
+	size_t i {0};
 
 	for (; i < ms; ++i) {
 		base_t s {(n[i] - m[i] - borrow) & base};
@@ -127,11 +125,12 @@ ap_n& ap_n::operator-=(ap_n const& x) {
 		n[i] = (n[i] - 1) & base;
 	}
 
-	return prune();
+	prune();
+	return *this;
 }
 
 ap_n& ap_n::operator*=(ap_n&& m) {
-	ap_n p {};
+	ap_n p;
 	while (index.size()) {
 		if (index[0] & 1)
 			p += m;
@@ -167,9 +166,10 @@ ap_n& ap_n::catch_reminder(ap_n& x) {
 }
 
 void ap_n::division(ap_n const& d) {
+	static ap_n const one {1};
 	auto i {size()};
-	ap_n q {};
-	ap_n r {};
+	ap_n q;
+	ap_n r;
 	while (i--) for (auto b {static_cast<base_t>(1) << bits-1}; b; b >>= 1) {
 		q <<= 1;
 		r <<= 1;
@@ -229,6 +229,8 @@ std::ostream& ap_n::out(std::ostream& os) const {
 	}
 	return os << ']';
 }
+
+explicit ap_n::operator bool() { return size(); }
 
 /* Non-member */
 
