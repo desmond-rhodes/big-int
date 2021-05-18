@@ -310,7 +310,7 @@ ap_n operator%(const ap_n& n, const ap_n& m) {
 }
 ap_n operator%(ap_n&& n, const ap_n& m) {
 	n %= m;
-	return std::move(m);
+	return std::move(n);
 }
 
 bool operator!=(const ap_n& n, const ap_n& m) { return !(n == m); }
