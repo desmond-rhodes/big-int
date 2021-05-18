@@ -12,7 +12,7 @@ static_assert(
 const ap_n one {1};
 
 ap_n::size_type ap_n::size() const {
-	auto s = index.size();
+	auto s {index.size()};
 	for (; s > 0; --s)
 		if (index[s-1])
 			break;
@@ -33,22 +33,22 @@ ap_n::ap_n(std::initializer_list<base_t> i)
 }
 
 ap_n& ap_n::operator<<=(unsigned int t) {
-	auto s = t / bits;
+	auto s {t / bits};
 	t %= bits;
 
 	if (t) {
-		base_t lo = (base >> t) & base;
-		base_t hi = ~lo & base;
+		base_t lo {(base >> t) & base};
+		base_t hi {~lo & base};
 		index.push_back(0);
-		for (auto i = index.size()-1; i > 0; --i)
+		for (auto i {index.size()-1}; i > 0; --i)
 			index[i] = (index[i] & lo) << t | (index[i-1] & hi) >> (bits-t);
 		index[0] = (index[0] & lo) << t;
 	}
 
 	if (s) {
-		auto j = index.size();
+		auto j {index.size()};
 		index.resize(index.size() + s);
-		auto i = index.size();
+		auto i {index.size()};
 		while (j > 0) index[--i] = index[--j];
 		while (i > 0) index[--i] = 0;
 	}
@@ -57,7 +57,7 @@ ap_n& ap_n::operator<<=(unsigned int t) {
 }
 
 ap_n& ap_n::operator>>=(unsigned int t) {
-	auto s = t / bits;
+	auto s {t / bits};
 	t %= bits;
 
 	if (s >= index.size()) {
@@ -66,15 +66,15 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	}
 
 	if (s) {
-		for (size_type i = s; i < index.size(); ++i)
+		for (size_type i {s}; i < index.size(); ++i)
 			index[i-s] = index[i];
 		index.resize(index.size() - s);
 	}
 
 	if (t) {
-		base_t hi = (base << t) & base;
-		base_t lo = ~hi & base;
-		for (size_type i = 0; i < index.size()-1; ++i)
+		base_t hi {(base << t) & base};
+		base_t lo {~hi & base};
+		for (size_type i {0}; i < index.size()-1; ++i)
 			index[i] = (index[i] & hi) >> t | (index[i+1] & lo) << (bits-t);
 		index.back() = (index.back() & hi) >> t;
 	}
@@ -82,11 +82,11 @@ ap_n& ap_n::operator>>=(unsigned int t) {
 	return prune();
 }
 
-ap_n& ap_n::operator+=(const ap_n& x) {
-	auto& n =   index;
-	auto& m = x.index;
-	auto ns =   size();
-	auto ms = x.size();
+ap_n& ap_n::operator+=(ap_n const& x) {
+	auto& n {  index };
+	auto& m {x.index };
+	auto ns {  size()};
+	auto ms {x.size()};
 	if (ns < ms) n.resize(ms+1, 0);
 	else if (index.size() == ns) n.push_back(0);
 
@@ -105,20 +105,20 @@ ap_n& ap_n::operator+=(const ap_n& x) {
 	return prune();
 }
 
-ap_n& ap_n::operator-=(const ap_n& x) {
-	auto& n =   index;
+ap_n& ap_n::operator-=(ap_n const& x) {
+	auto& n {  index };
 	if (*this <= x) {
 		n.clear();
 		return *this;
 	}
-	auto& m = x.index;
-	auto ms = x.size();
+	auto& m {x.index };
+	auto ms {x.size()};
 
 	base_t borrow {0};
 	size_type i {0};
 
 	for (; i < ms; ++i) {
-		base_t s = (n[i] - m[i] - borrow) & base;
+		base_t s {(n[i] - m[i] - borrow) & base};
 		borrow = (borrow) ? s >= n[i] : s > n[i];
 		n[i] = s;
 	}
@@ -142,14 +142,16 @@ ap_n& ap_n::operator*=(ap_n&& m) {
 	return *this;
 }
 
-ap_n& ap_n::operator/=(const ap_n& m) {
+ap_n& ap_n::operator/=(ap_n const& m) {
 	division(m);
-	return catch_quotient(*this);
+	catch_quotient(*this);
+	return *this;
 }
 
-ap_n& ap_n::operator%=(const ap_n& m) {
+ap_n& ap_n::operator%=(ap_n const& m) {
 	division(m);
-	return catch_reminder(*this);
+	catch_reminder(*this);
+	return *this;
 }
 
 ap_n& ap_n::catch_quotient(ap_n& x) {
@@ -164,11 +166,11 @@ ap_n& ap_n::catch_reminder(ap_n& x) {
 	return *this;
 }
 
-void ap_n::division(const ap_n& d) {
-	auto i = size();
+void ap_n::division(ap_n const& d) {
+	auto i {size()};
 	ap_n q {};
 	ap_n r {};
-	while (i--) for (auto b = static_cast<base_t>(1) << bits-1; b; b >>= 1) {
+	while (i--) for (auto b {static_cast<base_t>(1) << bits-1}; b; b >>= 1) {
 		q <<= 1;
 		r <<= 1;
 		if (index[i] & b)
@@ -182,17 +184,17 @@ void ap_n::division(const ap_n& d) {
 	reminder = std::move(r.index);
 }
 
-bool ap_n::operator==(const ap_n& x) const {
-	auto ns =   size();
-	auto ms = x.size();
+bool ap_n::operator==(ap_n const& x) const {
+	auto ns {  size()};
+	auto ms {x.size()};
 	if (ns != ms) return false;
 	while (ns) if (index[--ns] != x.index[--ms]) return false;
 	return true;
 }
 
-bool ap_n::operator<=(const ap_n& x) const {
-	auto ns =   size();
-	auto ms = x.size();
+bool ap_n::operator<=(ap_n const& x) const {
+	auto ns {  size()};
+	auto ms {x.size()};
 	if (ns > ms) return false;
 	if (ns < ms) return true;
 	while (ns) {
@@ -203,9 +205,9 @@ bool ap_n::operator<=(const ap_n& x) const {
 	return true;
 }
 
-bool ap_n::operator>=(const ap_n& x) const {
-	auto ns =   size();
-	auto ms = x.size();
+bool ap_n::operator>=(ap_n const& x) const {
+	auto ns {  size()};
+	auto ms {x.size()};
 	if (ns < ms) return false;
 	if (ns > ms) return true;
 	while (ns) {
@@ -217,8 +219,8 @@ bool ap_n::operator>=(const ap_n& x) const {
 }
 
 std::ostream& ap_n::out(std::ostream& os) const {
-	os << '[';
-	auto i = index.rbegin();
+	os << index.size() << ": [";
+	auto i {index.rbegin()};
 	if (i != index.rend()) for (;;) {
 		os << *i;
 		if (++i == index.rend())
@@ -230,7 +232,7 @@ std::ostream& ap_n::out(std::ostream& os) const {
 
 /* Non-member */
 
-ap_n operator<<(const ap_n& n, unsigned int t) {
+ap_n operator<<(ap_n const& n, unsigned int t) {
 	ap_n tmp {n};
 	tmp <<= t;
 	return tmp;
@@ -240,7 +242,7 @@ ap_n operator<<(ap_n&& n, unsigned int t) {
 	return std::move(n);
 }
 
-ap_n operator>>(const ap_n& n, unsigned int t) {
+ap_n operator>>(ap_n const& n, unsigned int t) {
 	ap_n tmp {n};
 	tmp >>= t;
 	return tmp;
@@ -250,71 +252,71 @@ ap_n operator>>(ap_n&& n, unsigned int t) {
 	return std::move(n);
 }
 
-ap_n operator+(const ap_n& n, const ap_n& m) {
+ap_n operator+(ap_n const& n, ap_n const& m) {
 	ap_n tmp {n};
 	tmp += m;
 	return tmp;
 }
-ap_n operator+(ap_n&& n, const ap_n& m) {
+ap_n operator+(ap_n&& n, ap_n const& m) {
 	n += m;
 	return std::move(n);
 }
-ap_n operator+(const ap_n& n, ap_n&& m) {
+ap_n operator+(ap_n const& n, ap_n&& m) {
 	m += n;
 	return std::move(m);
 }
 
-ap_n operator-(const ap_n& n, const ap_n& m) {
+ap_n operator-(ap_n const& n, ap_n const& m) {
 	ap_n tmp {n};
 	tmp -= m;
 	return tmp;
 }
-ap_n operator-(ap_n&& n, const ap_n& m) {
+ap_n operator-(ap_n&& n, ap_n const& m) {
 	n -= m;
 	return n;
 }
 
-ap_n& operator*=(ap_n& n, const ap_n& m) {
+ap_n& operator*=(ap_n& n, ap_n const& m) {
 	ap_n tmp {m};
 	n *= std::move(tmp);
 	return n;
 }
-ap_n operator*(const ap_n& n, const ap_n& m) {
+ap_n operator*(ap_n const& n, ap_n const& m) {
 	ap_n tmp {n};
 	tmp *= m;
 	return tmp;
 }
-ap_n operator*(ap_n&& n, const ap_n& m) {
+ap_n operator*(ap_n&& n, ap_n const& m) {
 	n *= m;
 	return std::move(n);
 }
-ap_n operator*(const ap_n& n, ap_n&& m) {
+ap_n operator*(ap_n const& n, ap_n&& m) {
 	m *= n;
 	return std::move(m);
 }
 
-ap_n operator/(const ap_n& n, const ap_n& m) {
+ap_n operator/(ap_n const& n, ap_n const& m) {
 	ap_n tmp {n};
 	tmp /= m;
 	return tmp;
 }
-ap_n operator/(ap_n&& n, const ap_n& m) {
+ap_n operator/(ap_n&& n, ap_n const& m) {
 	n /= m;
 	return std::move(n);
 }
 
-ap_n operator%(const ap_n& n, const ap_n& m) {
+ap_n operator%(ap_n const& n, ap_n const& m) {
 	ap_n tmp {n};
 	tmp %= m;
 	return tmp;
 }
-ap_n operator%(ap_n&& n, const ap_n& m) {
+ap_n operator%(ap_n&& n, ap_n const& m) {
 	n %= m;
 	return std::move(n);
 }
 
-bool operator!=(const ap_n& n, const ap_n& m) { return !(n == m); }
-bool operator<(const ap_n& n, const ap_n& m) { return !(n >= m); }
-bool operator>(const ap_n& n, const ap_n& m) { return !(n <= m); }
+bool operator!=(ap_n const& n, ap_n const& m) { return !(n == m); }
+bool operator<(ap_n const& n, ap_n const& m) { return !(n >= m); }
+bool operator>(ap_n const& n, ap_n const& m) { return !(n <= m); }
 
-std::ostream& operator<<(std::ostream& os, const ap_n& n) { return n.out(os); }
+std::ostream& operator<<(std::ostream& os, ap_n const& n) { return n.out(os); }

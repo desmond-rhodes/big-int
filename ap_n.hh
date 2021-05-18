@@ -19,18 +19,18 @@ class ap_n {
 		ap_n& operator<<=(unsigned int);
 		ap_n& operator>>=(unsigned int);
 
-		ap_n& operator+=(const ap_n&);
-		ap_n& operator-=(const ap_n&);
+		ap_n& operator+=(ap_n const&);
+		ap_n& operator-=(ap_n const&);
 		ap_n& operator*=(ap_n&&);
-		ap_n& operator/=(const ap_n&);
-		ap_n& operator%=(const ap_n&);
+		ap_n& operator/=(ap_n const&);
+		ap_n& operator%=(ap_n const&);
 
 		ap_n& catch_quotient(ap_n&);
 		ap_n& catch_reminder(ap_n&);
 
-		bool operator==(const ap_n&) const;
-		bool operator<=(const ap_n&) const;
-		bool operator>=(const ap_n&) const;
+		bool operator==(ap_n const&) const;
+		bool operator<=(ap_n const&) const;
+		bool operator>=(ap_n const&) const;
 
 		std::ostream& out(std::ostream&) const;
 
@@ -40,37 +40,37 @@ class ap_n {
 		std::vector<base_t> reminder;
 
 		ap_n& prune();
-		void division(const ap_n&);
+		void division(ap_n const&);
 };
 
-ap_n operator<<(const ap_n&, unsigned int);
+ap_n operator<<(ap_n const&, unsigned int);
 ap_n operator<<(ap_n&&, unsigned int);
 
-ap_n operator>>(const ap_n&, unsigned int);
+ap_n operator>>(ap_n const&, unsigned int);
 ap_n operator>>(ap_n&&, unsigned int);
 
-ap_n operator+(const ap_n&, const ap_n&);
-ap_n operator+(ap_n&&, const ap_n&);
-ap_n operator+(const ap_n&, ap_n&&);
+ap_n operator+(ap_n const&, ap_n const&);
+ap_n operator+(ap_n&&, ap_n const&);
+ap_n operator+(ap_n const&, ap_n&&);
 
-ap_n operator-(const ap_n&, const ap_n&);
-ap_n operator-(ap_n&&, const ap_n&);
+ap_n operator-(ap_n const&, ap_n const&);
+ap_n operator-(ap_n&&, ap_n const&);
 
-ap_n& operator*=(ap_n&, const ap_n&);
-ap_n operator*(const ap_n&, const ap_n&);
-ap_n operator*(ap_n&&, const ap_n&);
-ap_n operator*(const ap_n&, ap_n&&);
+ap_n& operator*=(ap_n&, ap_n const&);
+ap_n operator*(ap_n const&, ap_n const&);
+ap_n operator*(ap_n&&, ap_n const&);
+ap_n operator*(ap_n const&, ap_n&&);
 
-ap_n operator/(const ap_n&, const ap_n&);
-ap_n operator/(ap_n&&, const ap_n&);
+ap_n operator/(ap_n const&, ap_n const&);
+ap_n operator/(ap_n&&, ap_n const&);
 
-ap_n operator%(const ap_n&, const ap_n&);
-ap_n operator%(ap_n&&, const ap_n&);
+ap_n operator%(ap_n const&, ap_n const&);
+ap_n operator%(ap_n&&, ap_n const&);
 
-bool operator!=(const ap_n&, const ap_n&);
-bool operator<(const ap_n&, const ap_n&);
-bool operator>(const ap_n&, const ap_n&);
+bool operator!=(ap_n const&, ap_n const&);
+bool operator<(ap_n const&, ap_n const&);
+bool operator>(ap_n const&, ap_n const&);
 
-std::ostream& operator<<(std::ostream&, const ap_n&);
+std::ostream& operator<<(std::ostream&, ap_n const&);
 
 #endif
