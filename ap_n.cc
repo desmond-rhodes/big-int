@@ -168,7 +168,7 @@ void ap_n::division(const ap_n& d) {
 	auto i = size();
 	ap_n q {};
 	ap_n r {};
-	while (i--) for (auto b = 1 << bits-1; b; b >>= 1) {
+	while (i--) for (auto b = static_cast<base_t>(1) << bits-1; b; b >>= 1) {
 		q <<= 1;
 		r <<= 1;
 		if (index[i] & b)

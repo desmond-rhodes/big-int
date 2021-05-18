@@ -6,9 +6,9 @@
 
 class ap_n {
 	public:
-		using base_t = unsigned int;
-		static const base_t base {0xf};
-		static const base_t bits {4};
+		using base_t = unsigned long long;
+		static const base_t base {0xffffffffffffffff};
+		static const base_t bits {64};
 
 		using size_type = std::vector<base_t>::size_type;
 		size_type size() const;
