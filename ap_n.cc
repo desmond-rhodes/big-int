@@ -230,7 +230,7 @@ std::ostream& ap_n::out(std::ostream& os) const {
 	return os << ']';
 }
 
-explicit ap_n::operator bool() { return size(); }
+/* explicit */ ap_n::operator bool() { return size(); }
 
 /* Non-member */
 
